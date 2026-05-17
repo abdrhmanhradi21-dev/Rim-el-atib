@@ -484,6 +484,95 @@
             pointer-events: all;
         }
 
+        /* Countdown Screen */
+        .countdown-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 50%, #000 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+            gap: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .countdown-screen.active {
+            display: flex;
+        }
+
+        .countdown-title {
+            font-size: 2.5rem;
+            color: var(--primary-red);
+            text-shadow: 0 0 20px rgba(255, 0, 51, 0.8);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px rgba(255, 0, 51, 0.8);
+            }
+            50% {
+                transform: scale(1.1);
+                text-shadow: 0 0 40px rgba(255, 0, 51, 1);
+            }
+        }
+
+        .countdown-number {
+            font-size: 8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-red), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(255, 0, 51, 0.8);
+            animation: countdownPulse 1s ease-in-out;
+        }
+
+        @keyframes countdownPulse {
+            0% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        .countdown-text {
+            font-size: 1.3rem;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .countdown-bar {
+            width: 80%;
+            max-width: 500px;
+            height: 8px;
+            background: rgba(255, 0, 51, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 0, 51, 0.5);
+        }
+
+        .countdown-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-red), var(--neon-pink));
+            width: 100%;
+            transition: width 1s linear;
+            box-shadow: 0 0 10px rgba(255, 0, 51, 0.8);
+        }
+
         /* Age Verification */
         .age-verification {
             position: fixed;
@@ -495,7 +584,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+            z-index: 2001;
             animation: fadeIn 0.5s ease-out;
         }
 
@@ -573,7 +662,7 @@
             border-radius: 10px;
             padding: 15px 25px;
             color: #fff;
-            z-index: 2001;
+            z-index: 2002;
             box-shadow: 0 0 30px rgba(255, 0, 51, 0.6);
             animation: slideInRight 0.5s ease-out;
             max-width: 300px;
@@ -632,6 +721,10 @@
                 padding: 40px 30px;
             }
 
+            .countdown-number {
+                font-size: 5rem;
+            }
+
             .notification {
                 right: 10px;
                 left: 10px;
@@ -667,6 +760,14 @@
                 max-width: 350px;
                 padding: 30px 20px;
             }
+
+            .countdown-number {
+                font-size: 4rem;
+            }
+
+            .countdown-title {
+                font-size: 1.8rem;
+            }
         }
 
         /* Glow effect for elements */
@@ -689,6 +790,16 @@
                 <button class="age-button confirm" onclick="confirmAge()">نعم، أنا فوق 18</button>
                 <button class="age-button deny" onclick="denyAge()">لا، غادر الموقع</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Countdown Screen -->
+    <div class="countdown-screen" id="countdownScreen">
+        <div class="countdown-title">⏳ جاري التحضير...</div>
+        <div class="countdown-number" id="countdownNumber">5</div>
+        <div class="countdown-text">سيتم نقلك للموقع خلال ثواني...</div>
+        <div class="countdown-bar">
+            <div class="countdown-progress" id="countdownProgress"></div>
         </div>
     </div>
 
@@ -784,6 +895,9 @@
     </div>
 
     <script>
+        // العنوان المطلوب التوجيه إليه
+        const redirectURL = 'https://gamezone771.blogspot.com/';
+
         // Age Verification
         function confirmAge() {
             document.getElementById('ageVerification').style.display = 'none';
@@ -812,7 +926,7 @@
                 const notified = localStorage.getItem('notified');
                 if (!notified) {
                     const randomUser = '👤 ' + generateRandomUser();
-                    showNotification(randomUser + ' دخل للتو!');
+                    showNotification(randomUser + ' د��ل للتو!');
                     localStorage.setItem('notified', 'true');
                 }
             }, 2000);
@@ -832,11 +946,37 @@
             overlay.classList.remove('active');
         }
 
+        // عداد تنازلي
+        function startCountdown() {
+            const countdownScreen = document.getElementById('countdownScreen');
+            const countdownNumber = document.getElementById('countdownNumber');
+            const countdownProgress = document.getElementById('countdownProgress');
+            let count = 5;
+
+            countdownScreen.classList.add('active');
+
+            const countdownInterval = setInterval(() => {
+                count--;
+                countdownNumber.textContent = count;
+
+                // تحديث شريط التقدم
+                const progress = ((5 - count) / 5) * 100;
+                countdownProgress.style.width = progress + '%';
+
+                if (count <= 0) {
+                    clearInterval(countdownInterval);
+                    // التوجيه إلى الموقع المطلوب
+                    window.location.href = redirectURL;
+                }
+            }, 1000);
+        }
+
         function handleCTA() {
-            showNotification('🔥 جارٍ معالجة طلب الدخول...');
+            showNotification('🔥 جاري معالجة طلب الدخول...');
             setTimeout(() => {
                 showNotification('✅ تم فتح الحساب بنجاح!');
-                showPopup();
+                // بدء العداد التنازلي
+                startCountdown();
             }, 1000);
         }
 
