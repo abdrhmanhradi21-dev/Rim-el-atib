@@ -18,6 +18,94 @@
             padding: 20px;
         }
 
+        /* Age Verification Modal */
+        .age-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s;
+        }
+
+        .age-modal.hidden {
+            display: none;
+        }
+
+        .age-content {
+            background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+            border: 3px solid #ff0033;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 0 60px rgba(255,0,51,0.8);
+            animation: slideUp 0.5s;
+        }
+
+        .age-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .age-title {
+            font-size: 1.8rem;
+            color: #ff0033;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255,0,51,0.8);
+        }
+
+        .age-text {
+            font-size: 1rem;
+            color: #ddd;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .age-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .age-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .age-btn.yes {
+            background: linear-gradient(135deg, #ff0033, #ff1493);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255,0,51,0.6);
+        }
+
+        .age-btn.yes:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,0,51,1);
+        }
+
+        .age-btn.no {
+            background: rgba(255,255,255,0.1);
+            color: #aaa;
+            border: 2px solid #aaa;
+        }
+
+        .age-btn.no:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
         .main-content {
             text-align: center;
             max-width: 800px;
@@ -198,14 +286,37 @@
             to { opacity: 1; }
         }
 
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 600px) {
             .title { font-size: 1.8rem; }
             .countdown-number { font-size: 6rem; }
             .stats { gap: 20px; flex-direction: column; }
+            .age-content { padding: 40px 25px; }
         }
     </style>
 </head>
 <body>
+    <!-- Age Verification Modal -->
+    <div class="age-modal" id="ageModal">
+        <div class="age-content">
+            <div class="age-icon">⚠️</div>
+            <div class="age-title">التحقق من العمر</div>
+            <div class="age-text">
+                هذا الموقع مخصص للأشخاص البالغين فقط.<br>
+                يجب أن تكون بعمر 18 سنة أو أكثر للمتابعة.
+            </div>
+            <div class="age-buttons">
+                <button class="age-btn yes" onclick="confirmAge()">نعم، أنا فوق 18</button>
+                <button class="age-btn no" onclick="denyAge()">لا، غادر</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Countdown Screen -->
     <div class="countdown" id="countdown">
         <div class="countdown-title">⏳ جاري التحضير...</div>
         <div class="countdown-number" id="num">5</div>
@@ -215,7 +326,8 @@
         </div>
     </div>
 
-    <div class="main-content">
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent" style="display: none;">
         <div class="logo">🎯 VIP PRO 🎯</div>
         <h1 class="title">دخول VIP الآن</h1>
         <p class="subtitle">دخول سريع وآمن للمحتوى الحصري</p>
@@ -258,11 +370,20 @@
     </div>
 
     <script>
+        function confirmAge() {
+            document.getElementById('ageModal').classList.add('hidden');
+            document.getElementById('mainContent').style.display = 'block';
+            localStorage.setItem('ageVerified', 'true');
+        }
+
+        function denyAge() {
+            window.location.href = 'https://www.google.com';
+        }
+
         function startCountdown() {
             const countdown = document.getElementById('countdown');
             countdown.classList.add('show');
             
-            let count = 5;
             let current = 5;
             
             const interval = setInterval(() => {
@@ -276,6 +397,17 @@
                 }
             }, 1000);
         }
+
+        window.addEventListener('load', function() {
+            const ageVerified = localStorage.getItem('ageVerified');
+            if (ageVerified) {
+                document.getElementById('ageModal').classList.add('hidden');
+                document.getElementById('mainContent').style.display = 'block';
+            } else {
+                document.getElementById('ageModal').classList.remove('hidden');
+                document.getElementById('mainContent').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
